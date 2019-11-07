@@ -1,0 +1,283 @@
+paso 7 hechamos a andar el server y nos tiene que decir
+la leyenda que pusimos.
+
+paso 7 vamos a utilizar un framework que es bootstrap
+
+copiamos el cdn y mondificamos el nombre tiene que aparecer el nombre del nodemailer diferente
+
+Ahora en el index.html damos de alta el archivo css
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/main.css"/>
+
+    y en el main.css solo probamos si esta bien dado de alta con el siguiente
+
+    body {
+    background: rebeccapurple;
+}
+
+paso 8 
+en el index vamos agregar un div con un pading 4 esto le agrega un pading
+en todos los lados es decir un espacio
+
+paso 9
+creamos el formulario ese formulario tiene diferentes caracteristicas
+<body>
+   <div class="container p-4">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="">
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control" placeholder="Name" autofocus>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+   </div>
+</body>
+
+pero la principal es como lo vamos a llamar desde nuestro back en la propieda name con el nombre name
+
+si vieron cada vez quye refrescamos ya esta posicionado  el cursor en el
+input es por la caracteristica autofocus
+
+ahora vamos a escribir los demas campos que es del fomr-group del mail
+hasta el boton que va hacer que se envie el mail
+asi esta quedando el formulario refrescas y ok
+
+paso 10
+
+ahora en el action le ponemos hacia donde se van a enviar los datos
+que tenemos en el formulario es decir dentro de un send email
+ <form action="/send-email">
+ DESPUES AGRAGAMOS EL METODO DONDE SE VA ENVIA EN ESTE CASO EN EL METODO POST
+ METHOD="POST"
+ QUE VA AIR DENTRO DE LA CABEZAR DE ENVIO DE LA INFORMACION
+ <form action="/send-email"method="POST">
+
+ despues damos de alta la ruta creamos una carpeta ala altura
+ de src que se llame routes y creamos un archivo index.js
+
+ despues metemos el codigo en el index.js de routes
+
+ routes/index.js
+ const { Router } = require('express');
+const router = Router();
+
+module.export = router;
+
+despues lo mandamos a llamar en el index del app use
+
+//paso 11 llamamos al index de routes con el app.use
+app.use(require('./routes/index'))
+
+despues vamos a instalar nodemon
+vamos ala consola e instalamos con npm i nodemon -DE
+la -D es que sera soplo dependencia de desarrollo no en produccion
+
+y en el package.json va estar el dev dependencis
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+
+ahora en el packege json vamos a poner un nuevo script de desarrollo
+en el cual vamos a escribir lo siguiente
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+
+  y en la terminal corremos el npm run dev
+cada vez que hagas un cambio se reiniciara el server 
+pruebas con un console.log
+  si todo sale bien te dira que el servert esta arriba
+  depues creamos las rutas
+  en el index.js de routes ponemos el siguiente codigo
+
+  router.post('/send-email',(req,res)=>{
+    console.log(req.body);
+    res.send('recived')
+});
+
+donde mandamos un metodo posten la router
+si ven en la consola esta undefined que quiere
+decir que no esta definido el cuerpo del mensaje
+despues en el index.js principal de src
+
+nesecitamos que el servidor entienda lo que se le esta enviando al formulario
+entonces ponemos el siguiente metodo
+app.use(express.urlencoded({extended:false}))
+
+refrescamos andamos datos y el servidor ya ve que estamos enviando
+
+agregamos un atributo mas en este caso queremos que tambien interprete
+app.use(express.json());
+lo mensjes JSON
+
+ahora vamos a hacer un cambio donde la informacion
+donde agregamos o creamos una variable de cada dato que viene en el objeto
+router.post('/send-email',(req,res)=>{
+    const { name, email, phone, message}= req.body;
+    contentHTML = `
+        <h1>User Information</h1>
+        <ul>
+            <li>Username: ${name}</li>
+            <li>User Email: ${email}</li>
+            <li>Phone: ${phone}</li>
+        </ul>
+        <p>${message}</p>
+    `;
+
+    console.log(contentHTML);
+    res.send('recived')
+});
+
+esta es la estrucutra de como enviamos esto
+  <h1>User Information</h1>
+        <ul>
+            <li>Username: oscar</li>
+            <li>User Email: oscar@labweb.com.mx</li>
+            <li>Phone: 555</li>
+        </ul>
+        <p>oererijeo</p>
+
+ahora nos metemos a nodemailer  metemos a nodemailer
+si usamos gmail va bloqeuar por que gmail
+espera que los correos los envien los usuarios no un bot
+o una aplicacion o nesecitamos una autenticacion oauth2
+pero esos son mas pasos sin embargo no podemos
+vamos a utilizar un shackhosting
+
+entonces para eso yo tengo un hosting con un cpanel
+donde puedo crear correos entonces les creare un correo con el nombre y password de cada quien
+
+en la cuenta de correo que encontramos
+nos vamos a non-ssl y esa configuracion es la que nesecitamos
+
+Nombre de usuario:	contacto@cherrybit.com.mx
+Contraseña:	Utilice la contraseña de la cuenta de correo electrónico.
+Servidor entrante:	mail.cherrybit.com.mx
+IMAP Port: 143 POP3 Port: 110
+Servidor de correo:	mail.cherrybit.com.mx
+SMTP Port: 26
+
+ahora regresamos ala app cancelamos el server en la consola
+
+npm i nodemailer 
+
+despues en el index principal de nodemailer 
+const nodemailer = require('nodemailer');
+y despues en el transport
+
+ahora en index damos de alta los datos de nuestro server
+ const transporter= nodemailer.createTransport({
+        host: 'mail.cherrybit.com.mx',
+        port: 26,
+        secure: false,
+        auth:{
+            user:'contacto@cherrybit.com.mx',
+            pass:'Yy}S4lJsp)a_'
+        }
+    })
+     transporter.sendMail();
+ahora lo que hicimos fue adonde lo vamos a enviar
+
+para quien nesecitamo luego decirle hacia donde va el correo
+    transporter.sendMail({
+        from:"'cherrybit Server'<contacto@cherrybit.com.mx>",
+        to: 'oarcia99@gmail.com',
+        subject:'Formulario chingon',
+        text: 'hello world'
+    });
+
+esto es un metodo asincrono por que debe de esperar la respuesta el correo
+
+,async (req,res)=>{
+
+ await transporter.sendMail({
+        from:"'cherrybit Server'<contacto@cherrybit.com.mx>",
+        to: 'oarcia99@gmail.com',
+        subject:'Formulario chingon',
+        text: 'hello world'
+    });
+
+despues ponemos en la consola de donde viene el mensaje
+    const info = await transporter.sendMail({
+        from:"'cherrybit Server'<contacto@cherrybit.com.mx>",
+        to: 'oarcia99@gmail.com',
+        subject:'Formulario chingon',
+        text: 'hello world'
+    });
+    console.log('Message sent', info.messageId);
+
+entonce nostros nesecitamos una respuesta de recivido 
+para eso tenemos el archivo succes.html
+y ponemos el siguiente 
+<h1>success</h1>
+
+y en el index.js ya ponemos la ruta del archivo
+
+    res.send('/success.html')
+
+    explicamos el codigo
+
+    te va votar un error
+    Server on port 3000
+(node:24754) UnhandledPromiseRejectionWarning: Error [ERR_TLS_CERT_ALTNAME_INVALID]: Hostname/IP does not match certificate's altnames: Host: mail.cherrybit.com.mx. is not in the cert's altnames: DNS:servidor1267.il.controladordns.com, DNS:www.servidor1267.il.controladordns.com
+    at Object.checkServerIdentity (tls.js:279:12)
+    at TLSSocket.onConnectSecure (_tls_wrap.js:1328:27)
+    at TLSSocket.emit (events.js:210:5)
+    at TLSSocket._finishInit (_tls_wrap.js:792:8)
+    at TLSWrap.ssl.onhandshakedone (_tls_wrap.js:606:12)
+(node:24754) UnhandledPromiseRejectionWarning: Unhandled promise rejection. This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). (rejection id: 1)
+(node:24754) [DEP0018] DeprecationWarning: Unhandled promise rejections are deprecated. In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+
+aqui agregas una opcion mas en el index de src
+
+    const transporter= nodemailer.createTransport({
+        host: 'mail.cherrybit.com.mx',
+        port: 26,
+        secure: false,
+        auth:{
+            user:'contacto@cherrybit.com.mx',
+            pass:'Yy}S4lJsp)a_'
+        },
+        tls:{
+            rejectUnauthorized:false
+        }
+    });
+quiere decir que no vamos amandar un correo desde el mismo dominio
+como loe spera sin esa variable. cargamos e intentamos de neuvo
+
+te falta hasta abajo
+
+    const info = await transporter.sendMail({
+        from:"'cherrybit Server'<contacto@cherrybit.com.mx>",
+        to: 'oarcia99@gmail.com',
+        subject:'Formulario chingon',
+        text: 'hello world'
+    });
+    console.log('Message sent', info.messageId);
+   este ---->>> res.redirect('/success.html')
+
+enseñamos el ciorreo de email y todo chingon
+despues ya no mandaremos solo un texto html si no el contenido
+del html
+    const info = await transporter.sendMail({
+        from:"'cherrybit Server'<contacto@cherrybit.com.mx>",
+        to: 'oarcia99@gmail.com',
+        subject:'Formulario chingon',
+        //text: 'hello world'
+        html: contentHTML
+    });
+
+    agregamos el html
+     y vemos en gmail y todo salio coquton
+     
+
+
+
+
